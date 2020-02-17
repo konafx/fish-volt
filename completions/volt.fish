@@ -10,27 +10,16 @@ function __volt_get_profiles
     volt list -f '{{ range .Profiles }}{{ println .Name }}{{ end }}'
 end
 
-function __volt_get_plugs -a profile target
-    if contains $profile (__volt_get_profiles)
-        switch $target
-            case all
-                __fish_volt_all_plug
-            case this
-                __fish_volt_this_plug $profile
-            case not
-                comm -23 (__volt_all_plugs | psub) (__volt_get_this_plug $profile | psub)
-            case '*'
-                echo 
-        end
-    end
+function __volt_all_plugs
+    volt list -f "{{ range .Repos }}{{ println .Path }}{{ end }}" | sed -E 's@^(www\.)?github\.com/@@' | sort -u
 end
 
 function __volt_this_plugs -a profile
     volt list -f "{{ range .Profiles }}{{ if eq \"$profile\" .Name }}{{ range .ReposPath }}{{ println . }}{{ end }}{{ end }}{{ end }}" | sed -E 's@^(www\.)?github\.com/@@' | sort -u
 end
 
-function __volt_this_plug -a profile
-    volt list "{{ range .Profiles }}{{ if eq \"$profile\" .Name }}{{ range .ReposPath }}{{ println . }}{{ end }}{{ end }}{{ end }}" | sed -E 's@^(www\.)?github\.com/@@' | sort -u
+function __volt_disabled_plugs -a profile
+    comm -23 (__volt_all_plugs | psub) (__volt_this_plugs $profile | psub)
 end
 
 complete -c volt -x
@@ -58,10 +47,10 @@ complete -c volt -n "__fish_seen_subcommand_from rm" -s p -d "Remove also plugco
 complete -c volt -n "__fish_seen_subcommand_from list" -s f -d "It renders by given template which can access the information of lock.json"
 
 # enable
-complete -c volt -n "__fish_seen_subcommand_from enable" -a "(__volt_get_plugins (__volt_get_profile) not)"
+complete -c volt -n "__fish_seen_subcommand_from enable" -a "(__volt_disabled_plugs (__volt_get_profile))"
 
 # disable
-complete -c volt -n "__fish_seen_subcommand_from disable" -a "(__volt_get_plugins (__volt_get_profile) this)"
+complete -c volt -n "__fish_seen_subcommand_from disable" -a "(__volt_this_plugs (__volt_get_profile))"
 
 # edit
 complete -c volt -n "__fish_seen_subcommand_from edit" -a "(__volt_all_plugs)"
