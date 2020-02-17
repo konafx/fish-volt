@@ -3,11 +3,11 @@ function __fish_is_arg_n -a n
 end
 
 function __volt_get_profile
-    volt list '{{ .CurrentProfileName }}'
+    volt list -f '{{ .CurrentProfileName }}'
 end
 
 function __volt_get_profiles
-    volt list '{{ range .Profiles }}{{ println .Name }}{{ end }}'
+    volt list -f '{{ range .Profiles }}{{ println .Name }}{{ end }}'
 end
 
 function __volt_get_plugs -a profile target
@@ -25,15 +25,15 @@ function __volt_get_plugs -a profile target
     end
 end
 
-function __volt_all_plugs
-    volt list "{{ range .Repos }}{{ println .Path }}{{ end }}" | sed -E 's@^(www\.)?github\.com/@@' | sort -u
+function __volt_this_plugs -a profile
+    volt list -f "{{ range .Profiles }}{{ if eq \"$profile\" .Name }}{{ range .ReposPath }}{{ println . }}{{ end }}{{ end }}{{ end }}" | sed -E 's@^(www\.)?github\.com/@@' | sort -u
 end
 
 function __volt_this_plug -a profile
     volt list "{{ range .Profiles }}{{ if eq \"$profile\" .Name }}{{ range .ReposPath }}{{ println . }}{{ end }}{{ end }}{{ end }}" | sed -E 's@^(www\.)?github\.com/@@' | sort -u
 end
 
-complete -c volt -f
+complete -c volt -x
 complete -c volt -n "__fish_use_subcommand" -a "get" -d "Install or upgrade or add repository list as plugins"
 complete -c volt -n "__fish_use_subcommand" -a "rm" -d "Uninstall one or more repository from every profile"
 complete -c volt -n "__fish_use_subcommand" -a "list" -d "Vim plugin information extractor"
@@ -47,7 +47,7 @@ complete -c volt -n "__fish_use_subcommand" -a "self-upgrade" -d "Upgrade to the
 complete -c volt -n "__fish_use_subcommand" -a "version" -d "Show volt command version"
 
 # get
-complete -c volt -n "__fish_seen_subcommand_from get" -s l -a "-u" -d "All plugins in current profile as targets"
+complete -c volt -n "__fish_seen_subcommand_from get" -s l -d "All plugins in current profile as targets"
 complete -c volt -n "__fish_seen_subcommand_from get" -s u -a "(__volt_all_plugs)" -d "Upgrade plugins"
 
 # rm
