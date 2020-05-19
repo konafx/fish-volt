@@ -29,9 +29,10 @@ function __volt_this_plugs -a profile
     volt list -f "{{ range .Profiles }}{{ if eq \"$profile\" .Name }}{{ range .ReposPath }}{{ println . }}{{ end }}{{ end }}{{ end }}" | sed -E 's@^(www\.)?github\.com/@@' | sort -u
 end
 
+set index_update 3
 complete -f -c volt -n "__fish_use_subcommand" -a "get" -d "Install or upgrade or add localy {repository} list as plugins"
 complete -f -c volt -n "__fish_seen_subcommand_from get" -s u -d "upgrade plugins"
-complete -f -c volt -n "__fish_seen_subcommand_from get; string match -q -- -u (commandline -co)[3]" -a "(__volt_all_plugs)"
+complete -f -c volt -n "__fish_seen_subcommand_from get; and string match -q -- -u (commandline -co)[$index_update]" -a "(__volt_all_plugs)"
 complete -x -c volt -n "__fish_seen_subcommand_from get" -s l -a " -u" -d "use all plugins in current profile as targets"
 
 complete -f -c volt -n "__fish_use_subcommand" -a "rm" -d "Uninstall one or more {repository} from every profile"
@@ -48,7 +49,7 @@ complete -x -c volt -n "__fish_seen_subcommand_from enable" -a "(__volt_get_plug
 complete -x -c volt -n "__fish_seen_subcommand_from disable" -a "(__volt_get_plugs (__volt_get_profile) this)"
 
 complete -f -c volt -n "__fish_use_subcommand" -a "edit" -d "Open the plugconf file(s) of one or more repository for editing"
-complete -f -c volt -n "__fish_seen_subcommand_from edit" -a "(__volt_all_plugs)"
+complete -x -c volt -n "__fish_seen_subcommand_from edit" -a "(__volt_all_plugs)"
 
 complete -f -c volt -n "__fish_use_subcommand" -a "profile" -d "profile"
 complete -x -c volt -n "__fish_prev_arg_in profile" -a "set" -d "Set profile"
@@ -60,13 +61,18 @@ complete -x -c volt -n "__fish_prev_arg_in profile" -a "rename" -d "Rename profi
 complete -x -c volt -n "__fish_prev_arg_in profile" -a "add" -d "Add one or more repositories to profile"
 complete -x -c volt -n "__fish_prev_arg_in profile" -a "rm" -d "Remove one or more repositories to profile"
 
+set index_profile 4
 complete -f -c volt -n "__fish_seen_subcommand_from profile; and __fish_prev_arg_in set show destroy rename add rm" -a "(__volt_get_profiles)"
-complete -f -c volt -n "__fish_seen_subcommand_from profile; __fish_any_arg_in add; test (count (commandline -poc)) -ge 4" -a "(__volt_get_plugs (commandline -co)[4] not)"
-complete -f -c volt -n "__fish_seen_subcommand_from profile; __fish_any_arg_in rm; test (count (commandline -poc)) -ge 4" -a "(__volt_get_plugs (commandline -co)[4] this)"
+complete -f -c volt -n "__fish_seen_subcommand_from profile; and __fish_any_arg_in add; and test (count (commandline -poc)) -ge 4" -a "(__volt_get_plugs (commandline -co)[$index_profile] not)"
+complete -f -c volt -n "__fish_seen_subcommand_from profile; and __fish_any_arg_in rm; and test (count (commandline -poc)) -ge 4" -a "(__volt_get_plugs (commandline -co)[$index_profile] this)"
 
 complete -f -c volt -n "__fish_use_subcommand" -a "build" -d "Build ~/.vim/pack/volt/ directory"
+
 complete -f -c volt -n "__fish_use_subcommand" -a "migrate" -d "Perform miscellaneous migration operations"
+complete -f -c volt -n "__fish_seen_subcommand_from migrate" -o help
+complete -f -c volt -n "__fish_seen_subcommand_from migrate" -a "lockjson plugconf/config-func" -d "Migrate option"
+
 complete -f -c volt -n "__fish_use_subcommand" -a "self-upgrade" -d "Upgrade to the latest volt command"
-complete -f -c volt -n "__fish_seen_subcommand_from self-upgrade" -s "check" -d "Only checks the newer version is available"
+complete -f -c volt -n "__fish_seen_subcommand_from self-upgrade" -o check -d "Only checks the newer version is available"
 
 complete -f -c volt -n "__fish_use_subcommand" -a "version" -d "Show volt command version"
