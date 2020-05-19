@@ -60,8 +60,8 @@ complete -f -c volt -n "__fish_seen_subcommand_from profile" -a "add" -d "Add on
 complete -f -c volt -n "__fish_seen_subcommand_from profile" -a "rm" -d "Remove one or more repositories to profile"
 
 complete -f -c volt -n "__fish_seen_subcommand_from profile; __fish_prev_arg_in set show destroy rename add rm" -a "(__volt_get_profiles)"
-complete -f -c volt -n "__fish_seen_subcommand_from profile; __fish_any_arg_in add; test (count (commandline -poc)) -ge 4)" -a "(__volt_get_plugs (commandline -oc)[4] not)"
-complete -f -c volt -n "__fish_seen_subcommand_from profile; __fish_any_arg_in rm; test (count (commandline -poc)) -ge 4)" -a "(__volt_get_plugs (commandline -oc)[4] this)"
+complete -f -c volt -n "__fish_seen_subcommand_from profile; __fish_any_arg_in add; test (count (commandline -poc)) -ge 4" -a "(__volt_get_plugs (commandline -oc)[4] not)"
+complete -f -c volt -n "__fish_seen_subcommand_from profile; __fish_any_arg_in rm; test (count (commandline -poc)) -ge 4" -a "(__volt_get_plugs (commandline -oc)[4] this)"
 
 complete -f -c volt -n "__fish_use_subcommand" -a "build" -d "Build ~/.vim/pack/volt/ directory"
 complete -f -c volt -n "__fish_use_subcommand" -a "migrate" -d "Perform miscellaneous migration operations"
