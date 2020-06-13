@@ -1,3 +1,4 @@
+
 function __volt_get_profile
     volt list -f '{{ println .CurrentProfileName }}'
 end
@@ -16,17 +17,21 @@ function __volt_get_plugs -a profile target
             case not
                 comm -23 (__volt_all_plugs | psub) (__volt_this_plugs $profile | psub)
             case '*'
-                echo 
+                echo
         end
     end
 end
 
+function __volt_trim_github -d "Trim 'github.com' and 'www.github.com'"
+    sed -E 's@^(www\.)?github\.com/@@' $argv
+end
+
 function __volt_all_plugs
-    volt list -f "{{ range .Repos }}{{ println .Path }}{{ end }}" | sed -E 's@^(www\.)?github\.com/@@' | sort -u
+    volt list -f "{{ range .Repos }}{{ println .Path }}{{ end }}" | __volt_trim_github | sort -u
 end
 
 function __volt_this_plugs -a profile
-    volt list -f "{{ range .Profiles }}{{ if eq \"$profile\" .Name }}{{ range .ReposPath }}{{ println . }}{{ end }}{{ end }}{{ end }}" | sed -E 's@^(www\.)?github\.com/@@' | sort -u
+    volt list -f "{{ range .Profiles }}{{ if eq \"$profile\" .Name }}{{ range .ReposPath }}{{ println . }}{{ end }}{{ end }}{{ end }}" | __volt_trim_github | sort -u
 end
 
 set index_update 3
@@ -62,7 +67,8 @@ complete -x -c volt -n "__fish_prev_arg_in profile" -a "add" -d "Add one or more
 complete -x -c volt -n "__fish_prev_arg_in profile" -a "rm" -d "Remove one or more repositories to profile"
 
 set index_profile 4
-complete -f -c volt -n "__fish_seen_subcommand_from profile; and __fish_prev_arg_in set show destroy rename add rm" -a "(__volt_get_profiles)"
+set need_profile set show destroy rename add rm
+complete -f -c volt -n "__fish_seen_subcommand_from profile; and __fish_prev_arg_in $need_profile" -a "(__volt_get_profiles)"
 complete -f -c volt -n "__fish_seen_subcommand_from profile; and __fish_any_arg_in add; and test (count (commandline -poc)) -ge 4" -a "(__volt_get_plugs (commandline -co)[$index_profile] not)"
 complete -f -c volt -n "__fish_seen_subcommand_from profile; and __fish_any_arg_in rm; and test (count (commandline -poc)) -ge 4" -a "(__volt_get_plugs (commandline -co)[$index_profile] this)"
 
